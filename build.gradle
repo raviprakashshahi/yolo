@@ -1,0 +1,54 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+// set project version and java version
+version = "0.0.1-SNAPSHOT"
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = 'build/resources/main'
+    }
+    test {
+        output.resourcesDir = 'build/resources/test'
+    }
+}
+
+
+dependencies {
+
+}
+
+// function to get last commit ID used to build this jar
+static String getLastGitCommit() {
+    def git_show = Runtime.runtime.exec('git show')
+    def bufferedReader = new BufferedReader(new InputStreamReader((git_show.inputStream)))
+    def first_line = bufferedReader.readLine()
+    bufferedReader.close()
+    return first_line.split('\\s+')[1]
+}
+
+// function to get git branch used to build this jar
+static String getGitBranch() {
+    def p = Runtime.runtime.exec('git branch')
+    return new BufferedReader(new InputStreamReader((p.inputStream))).lines().findFirst { s -> s.startsWith('* ') }.get().split('\\s+')[1]
+}
+
+jar {
+    baseName = 'yolo-codeset'
+    version = version
+    manifest {
+        attributes(
+                "Created-By": "Ravi Prakash",
+                "Implementation-Vendor-Id": "Yolo Group",
+                "Git-Commit-ID": getLastGitCommit(),
+                "Git-Branch": getGitBranch(),
+                "Build-Timestamp": new Date()
+        )
+    }
+}
